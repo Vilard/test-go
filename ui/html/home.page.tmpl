@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang='en'>
+    <head>
+        <meta charset='utf-8'>
+        <title>Страница формирования отчетов</title>
+        <script ></script>
+        <!-- <script src="./ui/static/js/listenerButton.js`" type="text/javascript"></script> -->
+
+    </head>
+    <body>
+        <main>
+            <h1>Страница формирования отчетов</h1>
+            <p>Для того чтобы скачать отчет нажмите на кнопку</p>
+            <button type="button" id="createAndDownloadButton">скачать отчет</button>
+        </main>
+    </body>
+    <script type="text/javascript">
+    document.getElementById('createAndDownloadButton').addEventListener('click', function() {
+        
+        fetch('http://127.0.0.1:4000/create-report', {
+            method: 'POST'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error creating report');
+            }
+            return response.text(); 
+        })
+        .then(data => {
+            console.log(data); 
+            return fetch('http://127.0.0.1:4000/static/report.zip');
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Error downloading report');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = 'report.zip'; 
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url); 
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+        });
+    });
+    </script>
+</html>
